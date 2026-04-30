@@ -21,10 +21,15 @@ router.get('/', async (req: AuthRequest, res: Response) => {
       ORDER BY sc.created_at DESC
     `, [req.userId!]);
 
-    const parsed = saved.map((s: any) => ({
-      ...s,
-      courses: JSON.parse(s.courses)
-    }));
+    const parsed = saved.map((s: any) => {
+      let courses = [];
+      try {
+        courses = typeof s.courses === 'string' ? JSON.parse(s.courses) : (Array.isArray(s.courses) ? s.courses : []);
+      } catch (e) {
+        console.error(`Error parsing courses for saved college ${s.id}:`, e);
+      }
+      return { ...s, courses };
+    });
 
     res.json({ saved: parsed });
   } catch (error) {
@@ -71,13 +76,14 @@ router.delete('/:collegeId', async (req: AuthRequest, res: Response) => {
     const db = await getDb();
     const { collegeId } = req.params;
 
-    const existing = await queryOne(db, 'SELECT id FROM saved_colleges WHERE user_id = ? AND college_id = ?', [req.userId!, parseInt(collegeId)]);
+    const collegeIdStr = collegeId as string;
+    const existing = await queryOne(db, 'SELECT id FROM saved_colleges WHERE user_id = ? AND college_id = ?', [req.userId!, parseInt(collegeIdStr)]);
     if (!existing) {
       res.status(404).json({ error: 'Saved college not found' });
       return;
     }
 
-    await run(db, 'DELETE FROM saved_colleges WHERE user_id = ? AND college_id = ?', [req.userId!, parseInt(collegeId)]);
+    await run(db, 'DELETE FROM saved_colleges WHERE user_id = ? AND college_id = ?', [req.userId!, parseInt(collegeIdStr)]);
 
     res.json({ message: 'College removed from saved' });
   } catch (error) {
@@ -91,7 +97,8 @@ router.get('/check/:collegeId', async (req: AuthRequest, res: Response) => {
   try {
     const db = await getDb();
     const { collegeId } = req.params;
-    const existing = await queryOne(db, 'SELECT id FROM saved_colleges WHERE user_id = ? AND college_id = ?', [req.userId!, parseInt(collegeId)]);
+    const collegeIdStr = collegeId as string;
+    const existing = await queryOne(db, 'SELECT id FROM saved_colleges WHERE user_id = ? AND college_id = ?', [req.userId!, parseInt(collegeIdStr)]);
     res.json({ saved: !!existing });
   } catch (error) {
     console.error('Error checking saved:', error);

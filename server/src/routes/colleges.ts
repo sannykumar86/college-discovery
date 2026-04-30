@@ -82,11 +82,16 @@ router.get('/', async (req: Request, res: Response) => {
       [...params, limitNum, offset]
     );
 
-    // Parse courses JSON
-    const parsedColleges = colleges.map((c: any) => ({
-      ...c,
-      courses: JSON.parse(c.courses)
-    }));
+    // Parse courses JSON safely
+    const parsedColleges = colleges.map((c: any) => {
+      let courses = [];
+      try {
+        courses = typeof c.courses === 'string' ? JSON.parse(c.courses) : (Array.isArray(c.courses) ? c.courses : []);
+      } catch (e) {
+        console.error(`Error parsing courses for college ${c.id}:`, e);
+      }
+      return { ...c, courses };
+    });
 
     res.json({
       colleges: parsedColleges,
@@ -116,8 +121,12 @@ router.get('/filters', async (_req: Request, res: Response) => {
     const allCourses = await queryAll(db, 'SELECT courses FROM colleges');
     const courseSet = new Set<string>();
     allCourses.forEach((row: any) => {
-      const courses = JSON.parse(row.courses) as string[];
-      courses.forEach(c => courseSet.add(c));
+      try {
+        const courses = typeof row.courses === 'string' ? JSON.parse(row.courses) : (Array.isArray(row.courses) ? row.courses : []);
+        courses.forEach((c: string) => courseSet.add(c));
+      } catch (e) {
+        console.error('Error parsing courses from row:', e);
+      }
     });
 
     res.json({
@@ -138,21 +147,33 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const db = await getDb();
     const { id } = req.params;
-    const college = await queryOne(db, 'SELECT * FROM colleges WHERE id = ?', [parseInt(id)]);
+    const idStr = id as string;
+    const college = await queryOne(db, 'SELECT * FROM colleges WHERE id = ?', [parseInt(idStr)]);
 
     if (!college) {
       res.status(404).json({ error: 'College not found' });
       return;
     }
 
-    college.courses = JSON.parse(college.courses);
-    college.accepted_exams = JSON.parse(college.accepted_exams);
+    try {
+      college.courses = typeof college.courses === 'string' ? JSON.parse(college.courses) : (Array.isArray(college.courses) ? college.courses : []);
+    } catch (e) {
+      console.error(`Error parsing courses for college ${id}:`, e);
+      college.courses = [];
+    }
+
+    try {
+      college.accepted_exams = typeof college.accepted_exams === 'string' ? JSON.parse(college.accepted_exams) : (Array.isArray(college.accepted_exams) ? college.accepted_exams : []);
+    } catch (e) {
+      console.error(`Error parsing exams for college ${id}:`, e);
+      college.accepted_exams = [];
+    }
 
     // Get reviews
-    const reviews = await queryAll(db, 'SELECT * FROM reviews WHERE college_id = ? ORDER BY created_at DESC', [parseInt(id)]);
+    const reviews = await queryAll(db, 'SELECT * FROM reviews WHERE college_id = ? ORDER BY created_at DESC', [parseInt(idStr)]);
 
     // Calculate review stats
-    const reviewStats = await queryOne(db, 'SELECT COUNT(*) as count, AVG(rating) as avgRating FROM reviews WHERE college_id = ?', [parseInt(id)]);
+    const reviewStats = await queryOne(db, 'SELECT COUNT(*) as count, AVG(rating) as avgRating FROM reviews WHERE college_id = ?', [parseInt(idStr)]);
 
     res.json({
       ...college,
@@ -192,11 +213,21 @@ router.post('/compare', async (req: Request, res: Response) => {
       return;
     }
 
-    const parsedColleges = colleges.map((c: any) => ({
-      ...c,
-      courses: JSON.parse(c.courses),
-      accepted_exams: JSON.parse(c.accepted_exams)
-    }));
+    const parsedColleges = colleges.map((c: any) => {
+      let courses = [];
+      let accepted_exams = [];
+      try {
+        courses = typeof c.courses === 'string' ? JSON.parse(c.courses) : (Array.isArray(c.courses) ? c.courses : []);
+      } catch (e) {
+        console.error(`Error parsing courses for college ${c.id}:`, e);
+      }
+      try {
+        accepted_exams = typeof c.accepted_exams === 'string' ? JSON.parse(c.accepted_exams) : (Array.isArray(c.accepted_exams) ? c.accepted_exams : []);
+      } catch (e) {
+        console.error(`Error parsing exams for college ${c.id}:`, e);
+      }
+      return { ...c, courses, accepted_exams };
+    });
 
     res.json({ colleges: parsedColleges });
   } catch (error) {

@@ -32,8 +32,14 @@ router.post('/register', async (req: Request, res: Response) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await queryOne(db, 'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?) RETURNING id', [name, email, passwordHash]);
-    const userId = result.id;
+    
+    if (!result || !result.id) {
+      console.error('Registration failed: No ID returned from database');
+      res.status(500).json({ error: 'Registration failed: Database error' });
+      return;
+    }
 
+    const userId = result.id;
     const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({

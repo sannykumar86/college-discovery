@@ -16,11 +16,16 @@ app.use(express.json());
 // Routes
 app.use('/api/colleges', collegesRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/saved', savedRouter);
+import { getDb, initializeDatabase, checkConnection } from './db/index.js';
 
 // Health check
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/api/health', async (_req, res) => {
+  const dbStatus = await checkConnection();
+  res.json({ 
+    status: 'ok', 
+    database: dbStatus ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString() 
+  });
 });
 
 // Initialize database and start server

@@ -1,15 +1,32 @@
 import { Pool } from 'pg';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-});
+const pool = new Pool(
+  process.env.DATABASE_URL ? { 
+    connectionString: process.env.DATABASE_URL,
+    connectionTimeoutMillis: 10000,
+  } : {
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: parseInt(process.env.DB_PORT || '5432'),
+    connectionTimeoutMillis: 10000,
+  }
+);
 
 export async function getDb(): Promise<Pool> {
   return pool;
 }
 
-export function saveDb(): void {
-  // Not needed for Postgres
+export async function checkConnection(): Promise<boolean> {
+  try {
+    const client = await pool.connect();
+    client.release();
+    return true;
+  } catch (err) {
+    console.error('Database Connection Check Failed:', err);
+    return false;
+  }
 }
 
 export async function initializeDatabase(db: Pool): Promise<void> {
@@ -74,19 +91,29 @@ export async function initializeDatabase(db: Pool): Promise<void> {
 
 // Wrapper for SQLite's '?' bindings to Postgres '$1, $2, ...' bindings
 export async function queryAll(db: Pool, sql: string, params: any[] = []): Promise<any[]> {
-  let paramIndex = 1;
-  const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
-  const result = await db.query(pgSql, params);
-  return result.rows;
+  try {
+    let paramIndex = 1;
+    const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
+    const result = await db.query(pgSql, params);
+    return result.rows || [];
+  } catch (error) {
+    console.error('Database Query Error:', { sql, params, error });
+    throw error;
+  }
 }
 
 export async function queryOne(db: Pool, sql: string, params: any[] = []): Promise<any | null> {
   const results = await queryAll(db, sql, params);
-  return results.length > 0 ? results[0] : null;
+  return results && results.length > 0 ? results[0] : null;
 }
 
 export async function run(db: Pool, sql: string, params: any[] = []): Promise<void> {
-  let paramIndex = 1;
-  const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
-  await db.query(pgSql, params);
+  try {
+    let paramIndex = 1;
+    const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
+    await db.query(pgSql, params);
+  } catch (error) {
+    console.error('Database Run Error:', { sql, params, error });
+    throw error;
+  }
 }

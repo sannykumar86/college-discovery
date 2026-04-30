@@ -30,8 +30,15 @@ app.get('/api/health', async (_req, res) => {
 
 // Initialize database and start server
 async function start() {
-  const db = await getDb();
-  await initializeDatabase(db);
+  try {
+    const db = await getDb();
+    // Try to initialize, but don't crash the whole process if it fails
+    initializeDatabase(db).catch(err => {
+      console.error('Initial Database Setup Failed (will retry on demand):', err);
+    });
+  } catch (err) {
+    console.error('Failed to get database pool:', err);
+  }
 
   app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);

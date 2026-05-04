@@ -13,7 +13,7 @@ const generateColleges = () => {
       name, location, state, fees, rating, placement_percentage: placement, established_year: year, type,
       description: `${name} is a premier ${type} institution in ${state} offering exceptional technical education.`,
       image_url: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800",
-      website: "https://example.edu",
+      website: `https://${name.toLowerCase().replace(/[^a-z0-9]/g, '')}.edu.in`,
       avg_package: avg, highest_package: high, total_students: students,
       courses: JSON.stringify(["Computer Science", "Electronics", "Mechanical", "Civil", "IT"]),
       accepted_exams: JSON.stringify(exams)
@@ -53,17 +53,24 @@ const generateColleges = () => {
   const iiits = ["Hyderabad", "Bangalore", "Allahabad", "Gwalior", "Jabalpur", "Kanchipuram", "Guwahati", "Pune", "Kota", "Sri City", "Vadodara", "Nagpur", "Kalyani", "Lucknow", "Dharwad", "Bhagalpur", "Bhopal", "Kottayam", "Ranchi", "Una", "Surat"];
   iiits.forEach(c => add(`Indian Institute of Information Technology (IIIT) ${c}`, c, "Various", 200000, 4.0 + Math.random()*0.8, 85 + Math.random()*10, 1998 + Math.floor(Math.random()*20), "Government", 10 + Math.random()*8, 45 + Math.random()*60, 1500 + Math.random()*2000, ["JEE Main", "UGEE"]));
 
-  // 4. AKTU Affiliated Colleges (Maximum possible based on prominent ones + generated for bulk)
+  // 4. AKTU Affiliated Colleges
+  const aktuGov = [
+    {n: "Institute of Engineering and Technology (IET) Lucknow", c: "Lucknow", y: 1984},
+    {n: "Bundelkhand Institute of Engineering & Technology (BIET) Jhansi", c: "Jhansi", y: 1986},
+    {n: "Kamla Nehru Institute of Technology (KNIT) Sultanpur", c: "Sultanpur", y: 1979},
+    {n: "Uttar Pradesh Textile Technology Institute (UPTTI) Kanpur", c: "Kanpur", y: 1923}
+  ];
+  aktuGov.forEach(g => add(g.n, g.c, "Uttar Pradesh", 85000, 4.2 + Math.random()*0.5, 80 + Math.random()*10, g.y, "Government", 6 + Math.random()*3, 25 + Math.random()*20, 2000 + Math.random()*1000, ["JEE Main", "CUET"]));
+
   const aktuProminent = [
     "JSS Academy of Technical Education", "KIET Group of Institutions", "Ajay Kumar Garg Engineering College (AKGEC)", 
     "ABES Engineering College", "GL Bajaj Institute of Technology and Management", "Galgotias College of Engineering and Technology", 
     "Noida Institute of Engineering and Technology (NIET)", "IMS Engineering College", "Inderprastha Engineering College", 
     "Raj Kumar Goel Institute of Technology", "Krishna Engineering College", "United College of Engineering and Research", 
-    "Shri Ram Murti Smarak College of Engineering", "Institute of Engineering and Technology (IET)", "Bundelkhand Institute of Engineering & Technology", 
-    "Kamla Nehru Institute of Technology", "Pranveer Singh Institute of Technology", "Harcourt Butler Technical University",
-    "Madan Mohan Malaviya University of Technology", "ITS Engineering College", "Lloyd Institute of Engineering", "Accurate Institute", "Dronacharya Group"
+    "Shri Ram Murti Smarak College of Engineering", "Pranveer Singh Institute of Technology", 
+    "ITS Engineering College", "Lloyd Institute of Engineering", "Accurate Institute", "Dronacharya Group"
   ];
-  aktuProminent.forEach(name => add(name, "Greater Noida/Ghaziabad/Lucknow/Kanpur".split('/')[Math.floor(Math.random()*4)], "Uttar Pradesh", 120000, 3.5 + Math.random()*1.0, 70 + Math.random()*20, 1995 + Math.floor(Math.random()*20), "Private", 4.5 + Math.random()*3, 15 + Math.random()*30, 2500 + Math.random()*3000, ["CUET", "JEE Main", "UPCET"]));
+  aktuProminent.forEach(name => add(name, "Noida/Greater Noida/Ghaziabad/Kanpur".split('/')[Math.floor(Math.random()*4)], "Uttar Pradesh", 125000, 3.8 + Math.random()*0.7, 75 + Math.random()*15, 1995 + Math.floor(Math.random()*20), "Private", 5 + Math.random()*2.5, 18 + Math.random()*25, 3000 + Math.random()*2000, ["CUET", "JEE Main"]));
   
   for(let i=1; i<=100; i++) {
     add(`AKTU Affiliated Institute of Technology ${i}`, "Uttar Pradesh Region", "Uttar Pradesh", 90000 + Math.random()*50000, 3.0 + Math.random()*1.5, 50 + Math.random()*40, 2000 + Math.floor(Math.random()*20), "Private", 3.0 + Math.random()*3, 10 + Math.random()*20, 1000 + Math.random()*2000, ["UPCET", "CUET"]);

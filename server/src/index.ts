@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { getDb, initializeDatabase } from './db/index.js';
+import { getDb, initializeDatabase, checkConnection } from './db/index.js';
 import collegesRouter from './routes/colleges.js';
 import authRouter from './routes/auth.js';
 import savedRouter from './routes/saved.js';
@@ -16,7 +16,7 @@ app.use(express.json());
 // Routes
 app.use('/api/colleges', collegesRouter);
 app.use('/api/auth', authRouter);
-import { getDb, initializeDatabase, checkConnection } from './db/index.js';
+app.use('/api/saved', savedRouter);
 
 // Health check
 app.get('/api/health', async (_req, res) => {

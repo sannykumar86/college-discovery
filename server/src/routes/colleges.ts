@@ -29,8 +29,8 @@ router.get('/', async (req: Request, res: Response) => {
     const params: any[] = [];
 
     if (search) {
-      whereClause += ' AND (name LIKE ? OR location LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`);
+      whereClause += ' AND (name ILIKE ? OR location ILIKE ? OR state ILIKE ? OR courses ILIKE ?)';
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     if (location) {
@@ -59,7 +59,7 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     if (course) {
-      whereClause += ' AND courses LIKE ?';
+      whereClause += ' AND courses ILIKE ?';
       params.push(`%${course}%`);
     }
 

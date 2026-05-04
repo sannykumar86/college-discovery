@@ -4,6 +4,9 @@ const pool = new Pool(
   process.env.DATABASE_URL ? { 
     connectionString: process.env.DATABASE_URL,
     connectionTimeoutMillis: 10000,
+    ssl: {
+      rejectUnauthorized: false
+    }
   } : {
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -11,6 +14,7 @@ const pool = new Pool(
     password: process.env.DB_PASSWORD,
     port: parseInt(process.env.DB_PORT || '5432'),
     connectionTimeoutMillis: 10000,
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
   }
 );
 

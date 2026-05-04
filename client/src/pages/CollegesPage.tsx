@@ -71,11 +71,20 @@ const CollegesPage = () => {
             </div>
             <input
               type="text"
-              placeholder="Search by name or location..."
-              className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-l-lg focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder="Search by name, location, or course..."
+              className="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-l-lg focus:ring-emerald-500 focus:border-emerald-500"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
+            {searchInput && (
+              <button 
+                type="button"
+                onClick={() => { setSearchInput(''); updateParam('search', ''); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
           <button type="submit" className="btn-primary rounded-l-none border border-transparent">
             Search

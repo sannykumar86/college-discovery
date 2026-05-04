@@ -18,6 +18,10 @@ app.use('/api/colleges', collegesRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/saved', savedRouter);
 
+app.get("/",(req,res) => {
+  res.send("Backend is running");
+});
+
 // Health check
 app.get('/api/health', async (_req, res) => {
   const dbStatus = await checkConnection();

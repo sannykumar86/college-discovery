@@ -10,7 +10,10 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '3001');
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'https://college-discovery-gilt.vercel.app',
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes

@@ -25,8 +25,14 @@ export const getCurrentUser = async () => {
 
 // Colleges
 export const getColleges = async (params: any): Promise<CollegeResponse> => {
-  const response = await api.get('colleges', { params });
-  return response.data;
+  try {
+    const response = await api.get('colleges', { params });
+    console.log('[API getColleges] Success:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('[API getColleges] Error:', error);
+    throw error;
+  }
 };
 
 export const getFilters = async (): Promise<FiltersResponse> => {

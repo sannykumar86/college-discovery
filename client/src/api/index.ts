@@ -27,8 +27,18 @@ export const getCurrentUser = async () => {
 export const getColleges = async (params: any): Promise<CollegeResponse> => {
   try {
     const response = await api.get('colleges', { params });
-    console.log('[API getColleges] Success:', response.data);
-    return response.data;
+    console.log('[API getColleges] Raw Response:', response.data);
+    
+    // Normalize response: handle cases where backend might return array or object
+    const data = response.data;
+    if (Array.isArray(data)) {
+      return {
+        colleges: data,
+        pagination: { page: 1, limit: data.length, total: data.length, totalPages: 1 }
+      };
+    }
+    
+    return data;
   } catch (error) {
     console.error('[API getColleges] Error:', error);
     throw error;

@@ -62,6 +62,12 @@ const CollegesPage = () => {
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Explore Colleges</h1>
           <p className="text-slate-600">Discover and compare the best engineering colleges.</p>
+          {/* Temporary Debug Info */}
+          <div className="mt-2 p-2 bg-slate-100 rounded text-[10px] text-slate-500 font-mono">
+            API: {import.meta.env.VITE_API_URL || 'Using Fallback'} | 
+            Status: {isLoading ? 'Loading' : isError ? 'Error' : 'Ready'} | 
+            Count: {collegesData?.pagination.total || 'N/A'}
+          </div>
         </div>
         
         <form onSubmit={handleSearch} className="flex flex-1 max-w-md">

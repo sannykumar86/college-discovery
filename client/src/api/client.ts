@@ -2,8 +2,17 @@ import axios from 'axios';
 
 const PRODUCTION_API_URL = 'https://college-discovery-9sux.onrender.com/api/';
 
+const getBaseUrl = () => {
+  let url = import.meta.env.VITE_API_URL || PRODUCTION_API_URL;
+  url = url.replace(/\/$/, ''); // Remove trailing slash if any
+  if (!url.endsWith('/api')) {
+    url += '/api';
+  }
+  return url + '/';
+};
+
 const api = axios.create({
-  baseURL: (import.meta.env.VITE_API_URL || PRODUCTION_API_URL).replace(/\/$/, '') + '/',
+  baseURL: getBaseUrl(),
 });
 
 console.log('[API Client] Initialized with baseURL:', api.defaults.baseURL);

@@ -10,8 +10,19 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '3001');
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173', // Local Vite frontend
+  'https://college-discovery-gilt.vercel.app' // Production Vercel frontend
+];
+
 app.use(cors({
-  origin: true, // Reflect request origin
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
